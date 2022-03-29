@@ -42,13 +42,14 @@ spec:
       targetPort: 3000
 ---
 apiVersion: apps/v1
-kind: Deployment
+kind: StatefulSet
 metadata:
   name: redis
   labels:
     app: redis
 spec:
   replicas: 1
+  serviceName: redis
   selector:
     matchLabels:
       app: redis
@@ -70,17 +71,14 @@ spec:
               value: FLUSHDB,FLUSHALL
           ports:
             - containerPort: 6379
-          # volumeMounts:
-          #   - name: data
-          #     mountPath: "/data/"
-      # volumes:
-        # - name: data
-          # accessModes:
-          #   - ReadWriteOnce
-          # capacity:
-          #   storage: 5Gi
-          # hostPath:
-          #   path: /data/redis-data/
+          volumeMounts:
+            - mountPath: "/bitnami/redis/data"
+              name: chat-pv-claim
+      volumes:
+        - name: chat-pv-claim
+          persistentVolumeClaim:
+            claimName: chat-pv-claim
+
 ---
 apiVersion: v1
 kind: Service
@@ -93,3 +91,30 @@ spec:
     - protocol: TCP
       port: 6379
       targetPort: 6379
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: pv0001
+spec:
+  storageClassName: manual
+  accessModes:
+    - ReadWriteOnce
+  capacity:
+    storage: 5Gi
+  hostPath:
+    path: /data/pv0001/
+---
+# To make it work properly on minikube run command:
+# sudo chown 1001 /data/pv0001
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: chat-pv-claim
+spec:
+  storageClassName: manual
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 5Gi
