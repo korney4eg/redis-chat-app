@@ -24,15 +24,15 @@ var appEnv = cfenv.getAppEnv({
       "name": "pad-redis-demo"
     },
     "services": {
-      "local-redis": [
+      "redis": [
         {
           "credentials": {
-            "hostname": "127.0.0.1",
-            "password": "",
+            "hostname": "redis",
+            "password": "my_password",
             "port": "6379"
-          },
-          "name": "test-redis",
-          "tags": [ "redis" ]
+        },
+        "name": "redis",
+        "tags": [ "redis" ]
         }
       ]
     }
